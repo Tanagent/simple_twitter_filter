@@ -1,6 +1,7 @@
 import tweepy
 import datetime
 from textblob import TextBlob
+from tweet_store import TweetStore
 import json
 
 file_path = '../config/api.json'
@@ -17,6 +18,7 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 
 api = tweepy.API(auth)
+store = TweetStore()
 
 class StreamListener(tweepy.StreamListener):
     def on_status(self, status):
@@ -37,7 +39,8 @@ class StreamListener(tweepy.StreamListener):
                 'received_at': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
 
-            print(tweet_item)
+            store.push(tweet_item)
+            print("Pushed to redis:", tweet_item)
 
     def on_error(self, status_code):
         if status_code == 420:
@@ -45,4 +48,4 @@ class StreamListener(tweepy.StreamListener):
             
 stream_listener = StreamListener()
 stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
-stream.filter(track=["anarchy"])
+stream.filter(track=["anarchy", "republican", "liberals", "progressives"])
