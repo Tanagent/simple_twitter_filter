@@ -1,5 +1,6 @@
 import tweepy
 import datetime
+from textblob import TextBlob
 import json
 
 file_path = '../config/api.json'
@@ -20,9 +21,16 @@ api = tweepy.API(auth)
 class StreamListener(tweepy.StreamListener):
     def on_status(self, status):
         if('RT @' not in status.text):
+            blob = TextBlob(status.text)
+            sent = blob.sentiment
+            polarity = sent.polarity
+            subjectivity = sent.subjectivity
+
             tweet_item = {
                 'id_str': status.id_str,
                 'text': status.text,
+                'polarity': polarity,
+                'subjectivity': subjectivity,
                 'username': status.user.screen_name,
                 'name': status.user.name,
                 'profile_image_url': status.user.profile_image_url,
@@ -37,4 +45,4 @@ class StreamListener(tweepy.StreamListener):
             
 stream_listener = StreamListener()
 stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
-stream.filter(track=["@WarbyParker", "@Bonobos", "@Casper", "@Glossier", "@DollarShaveClub", "@Allbirds"])
+stream.filter(track=["anarchy"])
